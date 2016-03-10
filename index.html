@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Urban Boundary Growth</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+// load the javascript libraries 
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
+    <script src="https://rawgit.com/dwilhelm89/LeafletSlider/master/SliderControl.js" type="text/javascript"></script>
+    <script src="http://maps.stamen.com/js/tile.stamen.js"></script> 
+
+// load the stylesheets
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" type="text/css">
+
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: whitesmoke;
+            font-family: Lato, sans-serif;
+        }
+        header {
+            padding: 6px 10%;
+        }
+        h1 {
+            position: absolute;
+            z-index: 100;
+            top: 10px;
+            left: 60px;
+            padding: 8px 15px;
+            margin: 0;
+            color: whitesmoke;
+            font-size: 1.3em;
+            background: rgba(25,100,50,0.8);
+            border-radius: 0; 
+            font-weight: normal;
+        }
+        #map {            
+            position: absolute;
+            width: 100%;
+            top: 0;
+            bottom: 0;
+        }
+        footer {
+            padding: 6px 10%;
+            width: 80%;
+        }
+        p {
+            font-size: 1em;
+            color: #001323;
+        }
+        .legend {
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+        .leaflet-popup-content-wrapper {
+            opacity: 0.9;
+            border-radius: 5px;
+        }
+        #ui-controls {
+            width: 176px;
+            padding: 8px 15px 8px 15px;
+            background: rgba(75, 75, 75, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            color: whitesmoke;
+        }
+        .year-slider {
+            width: 100%;
+        }
+        #ui-controls .min {
+            float: left;
+        }
+        #ui-controls .max {
+            float: right;
+        }
+        label {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .info {
+            padding: 6px 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            text-align: right;
+        }
+        .info h3 {
+            margin: 0;
+        }
+}
+    </style>
+</head>
+
+<body>
+    <header>
+
+        <h1>Lexington Urban Growth Boundary 1958-2015</h1>
+        
+    </header>
+
+    <div id='map'></div>
+    
+    </div>
+    
+    // loading the javascript datafile
+    <script type="text/javascript" src = "USA_present.js"></script>
+    <script type="text/javascript" src = "USA_2001.js"></script>
+    <script type="text/javascript" src = "USA_2000.js"></script>
+    <script type="text/javascript" src = "USA_1998.js"></script>
+    <script type="text/javascript" src = "USA_1996.js"></script>
+    <script type="text/javascript" src = "USA_1980.js"></script>
+    <script type="text/javascript" src = "USA_1967.js"></script>
+    <script type="text/javascript" src = "USA_1964.js"></script>
+    <script type="text/javascript" src = "USA_1962.js"></script>
+    <script type="text/javascript" src = "USA_1958.js"></script>
+    
+    <script>
+    
+        //Initialize the leaflet map
+        var map = L.map('map', {
+            center: [38.0147,-84.483],
+            zoom: 11,
+            //minZoom: 10,
+            //maxZoom: 26,
+            zoomControl: true,
+            dragging: true,
+        });
+               
+        //Create the layer and add it to the map
+        var layer =new L.StamenTileLayer("watercolor");
+        map.addLayer(layer);     
+       
+       //Load tract data as leaflet geoJSON 
+       //Assign the style and onEachFeature functions
+       //Add the resulting features to the map
+        var geojson_present = L.geoJson(USA_present, {
+        		weight: 2,
+                opacity: 1,
+                color: 'black',
+                dashArray: '3',
+                fillOpacity: 0.7,
+        		onEachFeature: onEachFeature
+        }).addTo(map);
+
+		
+        var geojson_2001 = L.geoJson(USA_2001, {
+                weight: 2,
+                opacity: 1,
+                color: 'black',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+
+        var geojson_2000 = L.geoJson(USA_2000, {
+                weight: 2,
+                opacity: 1,
+                color: 'pink',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+
+        var geojson_1998 = L.geoJson(USA_1998, {
+                weight: 2,
+                opacity: 1,
+                color: 'orange',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+
+        var geojson_1996 = L.geoJson(USA_1996, {
+                weight: 2,
+                opacity: 1,
+                color: 'yellow',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+
+        var geojson_1980 = L.geoJson(USA_1980, {
+                weight: 2,
+                opacity: 1,
+                color: 'black',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+
+        var geojson_1967 = L.geoJson(USA_1967, {
+                weight: 2,
+                opacity: 1,
+                color: 'red',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+
+        var geojson_1964 = L.geoJson(USA_1964, {
+                weight: 2,
+                opacity: 1,
+                color: 'blue',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+        
+        var geojson_1962 = L.geoJson(USA_1962, {
+                weight: 2,
+                opacity: 1,
+                color: 'purple',
+                dashArray: '3',
+                fillOpacity: 0.7,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+
+        var geojson_1958 = L.geoJson(USA_1958, {
+                weight: 2,
+                opacity: 1,
+                color: 'green',
+                dashArray: '3',
+                fillOpacity: 1,
+                onEachFeature: onEachFeature
+        }).addTo(map);
+
+		//Create a leaflet control for the legend
+		//Give the legend an onAdd handler
+		//Add the legend to the map
+        // var legend = L.control({position: 'bottomright'});
+        
+        // legend.onAdd = function (map) {
+        //     var div = L.DomUtil.create('div', 'info legend'),
+        //         grades = [1000, 2000, 3000, 4000, 5000],
+        //         labels = [];
+        //     // loop through our density intervals and generate a label with a colored square for each interval
+        //     for (var i = 0; i < grades.length; i++) {
+        //         console.log("legend for "+ grades[i] + " to "+grades[i+1]+" = " +getColor(grades[i] + 1));
+        //         div.innerHTML +=
+        //             '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+        //             grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+        //     }  
+        //     return div;
+        // };
+        // legend.addTo(map);
+        
+        
+    //*
+    //STYLE CREATION
+    
+    //Given a value for the property DEC_10_S_2, return a specific color
+    // function getColor(DEC_10_S_2) {
+    //     return DEC_10_S_2 >= 5000 ? '#018571' :
+    //        DEC_10_S_2 >= 4000 ? '#80cdc1' :
+    //        DEC_10_S_2 >= 3000 ? '#f5f5f5' :
+    //        DEC_10_S_2 >= 2000 ? '#dfc27d' :
+    //        DEC_10_S_2 >= 1000 ? '#a6611a' :
+    //                   '#a6611a';
+    // } 
+        
+    //Given a feature, return an object with style properties that leaflet unsderstands   
+    // function style(feature) {
+    //     return {
+    //         fillColor: getColor(feature.properties.DEC_10_S_2),
+    //         weight: 2,
+    //         opacity: 1,
+    //         color: 'white',
+    //         dashArray: '3',
+    //         fillOpacity: 0.7
+    //     }
+    // }    
+ 
+    //**
+    //DOM EVENTS (Interactive stuff)
+    //Change a layer's style when passed a DOM event (e)
+    function highlightFeature(e) {
+    	var layer = e.target;
+    	layer.setStyle({
+    		weight: 5,
+    		color: '#666',
+    		dashArray: '',
+    		fillOpacity: 0.7
+        });
+
+    	if (!L.Browser.ie && !L.Browser.opera) {
+    		layer.bringToFront();
+    	}
+
+        //FIXME: Info hasn't been defined
+	    info.update(layer.feature.properties);
+    }
+    
+    //Reset a layer's style when passed a DOM event 
+    //(I guess leaflet keeps track of past layer styles?)    
+    function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+        //FIXME: Info hasn't been defined
+    	info.update();
+    }
+    
+    //Zoom to a feature when passed a DOM event
+    function zoomToFeature(e) {
+    	map.fitBounds(e.target.getBounds());
+    }
+    
+    //Now that the event handlers are written, assign them to
+    //specific DOM events that could happen to the layer
+    function onEachFeature(feature, layer) {
+    	layer.on({
+    		// mouseover: highlightFeature,
+    		mouseout: resetHighlight,
+    		click: zoomToFeature
+    	});
+    }
+            
+    </script>
+    
+</body>
+
+</html>
